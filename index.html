@@ -16,15 +16,12 @@
             background: #ddd;
             margin: 2em;
         }
-
         h1, h3 {
             color: #576774;
         }
-
         h1:first-child {
             margin-top: 0;
         }
-
         /*
             -------------------------------------------------------------------
             Form styles
@@ -36,7 +33,6 @@
             border: solid 1px #ccc;
             border-radius: .25em;
         }
-
         label {
             vertical-align: middle;
         }
@@ -48,7 +44,6 @@
         input[type='submit'] {
             font-family: sans-serif;
         }
-
         input[type='text'],
         input[type='password'],
         input[type='submit'],
@@ -57,7 +52,6 @@
             border-radius: .25em;
             -webkit-appearance: none;
         }
-
         input[type='text'],
         input[type='password'] {
             border: solid 1px #ddd;
@@ -65,7 +59,6 @@
             color: #555;
             width: 16em;
         }
-
         input[type='submit'] {
             border: solid 1px transparent;
             background: #0B77DB;
@@ -74,18 +67,12 @@
             padding: .75em 1em;
             cursor: pointer;
         }
-
         input[type='submit']:hover {
             background: #3C9AA7;
         }
-
         input[type='submit']:focus {
             background: #3D6EAC;
         }
-
-
-
-
         input[type='text']:focus,
         input[type='password']:focus,
         input[type='submit']:focus {
@@ -93,44 +80,32 @@
             border-color: #0B77DB;
             box-shadow: 0 0 6px rgba(48, 140, 255, 0.25);
         }
-
         input[type='submit']:active {
             background: #333;
             border-color: #333;
         }
-
-
-
-
         label + input[type=checkbox] {
             margin-left: 1em;
         }
-
         select {
             width: 17em;
         }
-
         fieldset {
             border: none;
             padding: 0;
         }
-
         fieldset + fieldset {
             border-top: solid 1px #eee;
         }
-
         .label {
             width: 10em;
             display: inline-block;
         }
-
         /*
             -------------------------------------------------------------------
             Error states
             -------------------------------------------------------------------
-
             An error class to forms that fail your validation:
-
             <p class='error'>
                 <label for='field'></label>
                 <input id='field' type='text' value='foo'>
@@ -140,16 +115,71 @@
         .error > label {
             color: red;
         }
-
         .error > input {
             border-color: red;
         }
-
     </style>
+    <script>
+        function validateEmail(email) {
+            var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+            return re.test(email);
+        }
+
+        function setError(input, message, error) {
+            input.parentElement.classList.add('error');
+            if(error) {
+                if(input.type.indexOf('select') > -1)
+                    input.options[0].innerText = message;
+                else
+                    input.placeholder = message;
+            }
+        }
+
+        function resetError(input, message) {
+            input.parentElement.classList.remove('error');
+            input.placeholder = "";
+        }
+
+        function validateForm(form) {
+            hasErrors = false;
+            if(!validateEmail(form.email.value))
+                setError(form.email, 'must be a valid email', hasErrors=true);
+            else resetError(form.email);
+
+            if(form.password.value.length < 8) {
+                setError(form.password, 'must contains at least 8 chars', hasErrors=true);
+            } else resetError(form.password);
+
+            if(!form.colour.selectedIndex) {
+                setError(form.colour, 'select one colour from the list', hasErrors=true);
+            } else resetError(form.colour);
+
+            var animals = [];
+            for(var option in form.animal) {
+                if(form.animal[option].type == 'checkbox' && form.animal[option].checked)
+                    animals.push(form.animal[option].value);
+            }
+
+            if(!animals.length) {
+                setError(form.animal[0], '', hasErrors=true);
+            } else resetError(form.animal[0]);
+
+            if(~animals.indexOf('tiger') && !form.tiger_type.value) {
+                setError(form.tiger_type, 'must define the tiger type', hasErrors=true);
+            } else resetError(form.tiger_type);
+
+            return !hasErrors;
+        }
+
+        function checkTigerType(checkbox){
+            var form = document.getElementById('awesome_form');
+            form.tiger_type.disabled = !checkbox.checked;
+        }
+    </script>
 </head>
 
 <body>
-    <form method='post' action=''>
+    <form id="awesome_form" method='post' action='' onsubmit="return validateForm(this);">
         <h1>Fill out this awesome form</h1>
         <fieldset>
             <h3>Your details</h3>
@@ -183,16 +213,16 @@
                 </select>
             </p>
             <p>
-                <span class="label">
+                <label class="label" for='animal'>
                     Animal
-                </span>
+                </label>
 
                 <input type='checkbox' name='animal' value='bear' id='bear'>
                 <label for='bear'>
                      Bear
                 </label>
 
-                <input type='checkbox' name='animal' value='tiger' id='tiger'>
+                <input type='checkbox' name='animal' value='tiger' id='tiger' onchange="checkTigerType(this);">
                 <label for='tiger'>
                     Tiger
                 </label>
@@ -212,7 +242,7 @@
                 <label class='label' for='tiger_type'>
                     Type of tiger
                 </label>
-                <input type='text' name='tiger_type' id='tiger_type'>
+                <input type='text' name='tiger_type' id='tiger_type' disabled="true">
             </p>
         </fieldset>
         <fieldset>
